@@ -393,54 +393,38 @@ library Math {
      */
     function log2(uint256 value) internal pure returns (uint256 result) {
         unchecked {
-            uint256 isGt;
+            uint256 exp;
 
-            assembly {
-                isGt := gt(value, 0xffffffffffffffffffffffffffffffff)
-            }
-            value >>= isGt * 128;
-            result += isGt * 128;
+            exp = 128 * _boolToUint(value > (1 << 128) - 1);
+            value >>= exp;
+            result += exp;
 
-            assembly {
-                isGt := gt(value, 0xffffffffffffffff)
-            }
-            value >>= isGt * 64;
-            result += isGt * 64;
+            exp = 64 * _boolToUint(value > (1 << 64) - 1);
+            value >>= exp;
+            result += exp;
 
-            assembly {
-                isGt := gt(value, 0xffffffff)
-            }
-            value >>= isGt * 32;
-            result += isGt * 32;
+            exp = 32 * _boolToUint(value > (1 << 32) - 1);
+            value >>= exp;
+            result += exp;
 
-            assembly {
-                isGt := gt(value, 0xffff)
-            }
-            value >>= isGt * 16;
-            result += isGt * 16;
+            exp = 16 * _boolToUint(value > (1 << 16) - 1);
+            value >>= exp;
+            result += exp;
 
-            assembly {
-                isGt := gt(value, 0xff)
-            }
-            value >>= isGt * 8;
-            result += isGt * 8;
+            exp = 8 * _boolToUint(value > (1 << 8) - 1);
+            value >>= exp;
+            result += exp;
 
-            assembly {
-                isGt := gt(value, 0xf)
-            }
-            value >>= isGt * 4;
-            result += isGt * 4;
+            exp = 4 * _boolToUint(value > (1 << 4) - 1);
+            value >>= exp;
+            result += exp;
 
-            assembly {
-                isGt := gt(value, 0x3)
-            }
-            value >>= isGt * 2;
-            result += isGt * 2;
+            exp = 2 * _boolToUint(value > (1 << 2) - 1);
+            value >>= exp;
+            result += exp;
 
-            assembly {
-                isGt := gt(value, 0x1)
-            }
-            result += isGt;
+            exp = 1 * _boolToUint(value > (1 << 1) - 1);
+            result += exp;
         }
     }
 
@@ -552,5 +536,16 @@ library Math {
      */
     function unsignedRoundsUp(Rounding rounding) internal pure returns (bool) {
         return uint8(rounding) % 2 == 1;
+    }
+
+    /**
+     * @dev Convert a boolean to an integer. Returns 1 for true and 0 for false.
+     * This function doesn't do any cleaning up, so it may only be used
+     * with the results of operations that are known to not set the higher bits.
+     */
+    function _boolToUint(bool b) private pure returns (uint256 u) {
+        assembly {
+            u := b
+        }
     }
 }
